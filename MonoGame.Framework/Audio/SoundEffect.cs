@@ -1,6 +1,8 @@
 // MonoGame - Copyright (C) The MonoGame Team
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
+
+// Modified to use NVorbis for ogg streaming
 ﻿
 using System;
 using System.IO;
@@ -13,7 +15,7 @@ namespace Microsoft.Xna.Framework.Audio
     /// <para>The only limit on the number of loaded SoundEffects is restricted by available memory. When a SoundEffect is disposed, all SoundEffectInstances created from it will become invalid.</para>
     /// <para>SoundEffect.Play() can be used for 'fire and forget' sounds. If advanced playback controls like volume or pitch is required, use SoundEffect.CreateInstance().</para>
     /// </remarks>
-    public sealed partial class SoundEffect : IDisposable
+    public partial class SoundEffect : IDisposable
     {
         #region Internal Audio Data
 
@@ -21,6 +23,8 @@ namespace Microsoft.Xna.Framework.Audio
         
         private bool _isDisposed = false;
         private TimeSpan _duration = TimeSpan.Zero;
+
+        protected int _introStart = 0, _loopStart = -1, _loopEnd = -1;
 
         #endregion
 
@@ -81,11 +85,20 @@ namespace Microsoft.Xna.Framework.Audio
         /// <remarks>Creating a SoundEffectInstance before calling SoundEffectInstance.Play() allows you to access advanced playback features, such as volume, pitch, and 3D positioning.</remarks>
         public SoundEffectInstance CreateInstance()
         {
+            /* //Debug
+            return CreateInstance(0, -1, -1);
+        }
+
+        public SoundEffectInstance CreateInstance(int intro_start, int loop_start, int loop_end)
+        {*/
+            //var inst = new SoundEffectInstance(intro_start, loop_start, loop_end); //Debug
             var inst = new SoundEffectInstance();
             PlatformSetupInstance(inst);
 
             inst._isPooled = false;
             inst._effect = this;
+            if (_loopEnd > _loopStart)
+                inst.IsLooped = true;
 
             return inst;
         }
@@ -111,6 +124,31 @@ namespace Microsoft.Xna.Framework.Audio
               Sample rate must be between 8,000 Hz and 48,000 Hz*/
 
             var sfx = new SoundEffect();
+
+            sfx.PlatformLoadAudioStream(s);
+
+            return sfx;
+        }
+        public static SoundEffect FromStream(Stream s,
+            int intro_start, int loop_start, int loop_end)
+        {
+            if (s == null)
+                throw new ArgumentNullException();
+
+            // Notes from the docs:
+
+            /*The Stream object must point to the head of a valid PCM wave file. Also, this wave file must be in the RIFF bitstream format.
+              The audio format has the following restrictions:
+              Must be a PCM wave file
+              Can only be mono or stereo
+              Must be 8 or 16 bit
+              Sample rate must be between 8,000 Hz and 48,000 Hz*/
+
+            var sfx = new SoundEffect();
+
+            sfx._introStart = intro_start;
+            sfx._loopStart = loop_start;
+            sfx._loopEnd = loop_end;
 
             sfx.PlatformLoadAudioStream(s);
 
@@ -235,6 +273,10 @@ namespace Microsoft.Xna.Framework.Audio
             get { return _name; }
             set { _name = value; }
         }
+
+        public int IntroStart { get { return _introStart; } }
+        public int LoopStart { get { return _loopStart; } }
+        public int LoopEnd { get { return _loopEnd; } }
 
         #endregion
 

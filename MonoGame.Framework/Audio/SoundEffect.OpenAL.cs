@@ -23,7 +23,7 @@ using Foundation;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-    public sealed partial class SoundEffect : IDisposable
+    public partial class SoundEffect : IDisposable
     {
         internal const int MAX_PLAYING_INSTANCES = OpenALSoundController.MAX_NUMBER_OF_SOURCES;
 
@@ -123,6 +123,9 @@ namespace Microsoft.Xna.Framework.Audio
             }
 
 #endif
+
+            SoundBuffer = new OALSoundBuffer();
+            SoundBuffer.BindDataBuffer(_data, Format, Size, (int)Rate);
         }
 
         private void PlatformInitialize(byte[] buffer, int sampleRate, AudioChannels channels)

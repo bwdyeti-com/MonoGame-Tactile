@@ -88,7 +88,9 @@ namespace Microsoft.Xna.Framework.Audio
 #endif
         private List<int> availableSourcesCollection;
         private List<int> inUseSourcesCollection;
-        private List<int> playingSourcesCollection;
+        //private List<int> playingSourcesCollection; //Debug
+        private List<SoundEffectInstance> playingSourcesCollection;
+        private List<SoundEffectInstance> pausedSourcesForSuspend;
         private List<int> purgeMe;
         private bool _bSoundAvailable = false;
         private Exception _SoundInitException; // Here to bubble back up to the developer
@@ -112,7 +114,7 @@ namespace Microsoft.Xna.Framework.Audio
 
             availableSourcesCollection = new List<int>(allSourcesArray);
 			inUseSourcesCollection = new List<int>();
-			playingSourcesCollection = new List<int>();
+			playingSourcesCollection = new List<SoundEffectInstance>();
             purgeMe = new List<int>();
 		}
 
@@ -421,7 +423,7 @@ namespace Microsoft.Xna.Framework.Audio
             }
             lock (playingSourcesCollection)
             {
-                playingSourcesCollection.Add(inst.SourceId);
+                playingSourcesCollection.Add(inst);
             }
             AL.SourcePlay(inst.SourceId);
             ALHelper.CheckError("Failed to play source.");
@@ -430,12 +432,15 @@ namespace Microsoft.Xna.Framework.Audio
         public void FreeSource(SoundEffectInstance inst)
         {
             lock (playingSourcesCollection) {
-                playingSourcesCollection.Remove(inst.SourceId);
+                if (!playingSourcesCollection.Contains(inst))
+                    return;
+
+                playingSourcesCollection.Remove(inst);
             }
             RecycleSource(inst.SourceId);
             inst.SourceId = 0;
             inst.HasSourceId = false;
-            inst.SoundState = SoundState.Stopped;
+            inst.SoundState = SoundState.Initial; //.Stopped; //Debug
 		}
 
         /// <summary>
@@ -471,6 +476,11 @@ namespace Microsoft.Xna.Framework.Audio
 			return pos;
 		}
 
+#if ANDROID
+        byte stream_update_frame = 0;
+        List<byte> STREAM_UPDATE_FRAMES = new List<byte> { 0, 3 };
+        const byte STREAM_UPDATE_TIME = 5;
+#endif
         /// <summary>
         /// Called repeatedly, this method cleans up the state of the management lists. This method
         /// will also lock on the playingSourcesCollection. Sources that are stopped will be recycled
@@ -489,13 +499,76 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 for (int i = playingSourcesCollection.Count - 1; i >= 0; --i)
                 {
-                    int sourceId = playingSourcesCollection[i];
+                    var instance = playingSourcesCollection[i];
+                    int sourceId = instance.SourceId;
                     state = AL.GetSourceState(sourceId);
+
+                    var soundBuffer = instance._effect.SoundBuffer;
+
+                    int processed;
+                    int queued;
+
+                    AL.GetSource(sourceId, ALGetSourcei.BuffersProcessed, out processed);
+                    AL.GetSource(sourceId, ALGetSourcei.BuffersQueued, out queued);
+
                     ALHelper.CheckError("Failed to get source state.");
-                    if (state == ALSourceState.Stopped)
+
+                    bool streaming = soundBuffer is OALSoundBufferStreamed;
+                    var streamingBuffer = soundBuffer as OALSoundBufferStreamed;
+
+                    if (streaming && streamingBuffer.ActivelyStreaming)
                     {
-                        purgeMe.Add(sourceId);
-                        playingSourcesCollection.RemoveAt(i);
+#if ANDROID
+                        if (STREAM_UPDATE_FRAMES.Contains(stream_update_frame))
+                        {
+#endif
+                            state = AL.GetSourceState(sourceId);
+                            streamingBuffer.DisposePlayedBuffers(sourceId, processed);
+                            streamingBuffer.ReadStream();
+                            // Then after reading data, if either there are two or less buffers remaining to play or the stream is done, queue more buffers
+                            if (queued - processed <= 2 || !streamingBuffer.ActivelyStreaming)
+                            {
+                                streamingBuffer.QueueStreamBuffers(sourceId);
+                                if (state == ALSourceState.Stopped)
+                                {
+                                    AL.SourcePlay(sourceId);
+                                    ALHelper.CheckError("Failed to play source.");
+                                }
+                                AL.GetSource(sourceId, ALGetSourcei.BuffersQueued, out queued);
+                            }
+
+                            ALError alError;
+                            alError = AL.GetError();
+#if ANDROID
+                        }
+#endif
+                    }
+                    else if ((streaming && streamingBuffer.StreamedLoop) && queued >= 1)
+                    {
+                        if (queued - processed <= 1)
+                        {
+                            streamingBuffer.DisposePlayedBuffers(sourceId, processed);
+
+                            AL.Source(sourceId, ALSourceb.Looping, true);
+                            state = AL.GetSourceState(sourceId);
+                            if (state == ALSourceState.Stopped)
+                            {
+                                AL.SourcePlay(sourceId);
+                                ALHelper.CheckError("Failed to play source.");
+                            }
+                        }
+                        else if (processed > 0)
+                        {
+                            streamingBuffer.DisposePlayedBuffers(sourceId, processed);
+                        }
+                    }
+                    else
+                    {
+                        if (state == ALSourceState.Stopped)
+                        {
+                            purgeMe.Add(sourceId);
+                            playingSourcesCollection.RemoveAt(i);
+                        }
                     }
                 }
             }
@@ -510,6 +583,9 @@ namespace Microsoft.Xna.Framework.Audio
                 }
                 purgeMe.Clear();
             }
+#if ANDROID
+            stream_update_frame = (byte)((stream_update_frame + 1) % STREAM_UPDATE_TIME);
+#endif
         }
 
 #if ANDROID
@@ -526,24 +602,36 @@ namespace Microsoft.Xna.Framework.Audio
         {
             // Pause all currently playing sounds. The internal pause count in OALSoundBuffer
             // will take care of sounds that were already paused.
-            //            lock (playingSourcesCollection)
-            //            {
-            //                foreach (var source in playingSourcesCollection)
-            //                    source.Pause();
-            //            }
-            alcDevicePauseSOFT(_device);
+            lock (playingSourcesCollection)
+            {
+                if (pausedSourcesForSuspend == null)
+                    pausedSourcesForSuspend = new List<SoundEffectInstance>();
+                foreach (var source in playingSourcesCollection)
+                {
+                    if (source.SoundState == SoundState.Playing)
+                    {
+                        source.Pause();
+                        //AL.SourcePause(source.SourceId);
+                        pausedSourcesForSuspend.Add(source);
+                    }
+                }
+            }
+            //alcDevicePauseSOFT(_device);
         }
 
         void Activity_Resumed(object sender, EventArgs e)
         {
             // Resume all sounds that were playing when the activity was paused. The internal
             // pause count in OALSoundBuffer will take care of sounds that were previously paused.
-            //            lock (playingSourcesCollection)
-            //            {
-            //                foreach (var source in playingSourcesCollection)
-            //                    source.Resume();
-            //            }
-            alcDeviceResumeSOFT(_device);
+            lock (playingSourcesCollection)
+            {
+                if (pausedSourcesForSuspend != null)
+                    foreach (var source in pausedSourcesForSuspend)
+                        source.Resume();
+                        //AL.SourcePlay(source.SourceId);
+                pausedSourcesForSuspend = null;
+            }
+            //alcDeviceResumeSOFT(_device);
         }
 #endif
 

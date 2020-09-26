@@ -2,6 +2,8 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
+// Modified to use NVorbis for ogg streaming
+
 using System;
 
 namespace Microsoft.Xna.Framework.Audio
@@ -10,7 +12,7 @@ namespace Microsoft.Xna.Framework.Audio
     /// <remarks>
     /// <para>SoundEffectInstances are created through SoundEffect.CreateInstance() and used internally by SoundEffect.Play()</para>
     /// </remarks>
-    public partial class SoundEffectInstance : IDisposable
+    public partial class SoundEffectInstance// : IDisposable
     {
         private bool _isDisposed = false;
         internal bool _isPooled = true;
@@ -19,6 +21,9 @@ namespace Microsoft.Xna.Framework.Audio
         private float _pan;
         private float _volume;
         private float _pitch;
+
+        private bool _disposeEffect = false;
+
 
         /// <summary>Enables or Disables whether the SoundEffectInstance should repeat after playback.</summary>
         /// <remarks>This value has no effect on an already playing sound.</remarks>
@@ -50,8 +55,9 @@ namespace Microsoft.Xna.Framework.Audio
             get { return _pitch; }
             set
             {
-                if (value < -1.0f || value > 1.0f)
-                    throw new ArgumentOutOfRangeException();
+                // XNA pitch range, but we're not using limits even on Windows //Debug
+                //if (value < -1.0f || value > 1.0f)
+                //    throw new ArgumentOutOfRangeException();
 
                 _pitch = value;
                 PlatformSetPitch(value);
@@ -180,6 +186,11 @@ namespace Microsoft.Xna.Framework.Audio
             PlatformStop(immediate);
         }
 
+        public void AlsoDisposeEffect()
+        {
+            _disposeEffect = true;
+        }
+
         /// <summary>Releases the resources held by this <see cref="Microsoft.Xna.Framework.Audio.SoundEffectInstance"/>.</summary>
         public void Dispose()
         {
@@ -202,6 +213,9 @@ namespace Microsoft.Xna.Framework.Audio
             {
                 PlatformDispose(disposing);
                 _isDisposed = true;
+
+                if (_disposeEffect && _effect != null)
+                    _effect.Dispose();
             }
         }
     }

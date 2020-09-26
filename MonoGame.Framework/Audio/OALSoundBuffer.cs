@@ -14,11 +14,11 @@ namespace Microsoft.Xna.Framework.Audio
 {
 	internal class OALSoundBuffer : IDisposable
 	{
-		int openALDataBuffer;
-		ALFormat openALFormat;
-		int dataSize;
-		int sampleRate;
-        bool _isDisposed;
+		protected int openALDataBuffer;
+		protected ALFormat openALFormat;
+		protected int dataSize;
+		protected int sampleRate;
+        protected bool _isDisposed;
 
 		public OALSoundBuffer ()
 		{

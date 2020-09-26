@@ -12,9 +12,9 @@ using OpenTK.Audio.OpenAL;
 
 namespace Microsoft.Xna.Framework.Audio
 {
-    public partial class SoundEffectInstance : IDisposable
+    public partial class SoundEffectInstance //@Debug: : IDisposable
     {
-		internal SoundState SoundState = SoundState.Stopped;
+		internal SoundState SoundState = SoundState.Initial;
 		private bool _looped = false;
 		private float _alVolume = 1;
 
@@ -26,7 +26,6 @@ namespace Microsoft.Xna.Framework.Audio
         internal bool HasSourceId = false;
 
         #region Initialization
-
         /// <summary>
         /// Creates a standalone SoundEffectInstance from given wavedata.
         /// </summary>
@@ -62,8 +61,9 @@ namespace Microsoft.Xna.Framework.Audio
             •Remember: the XNA limit is arbitrarily between two octaves on the domain. *
             •To convert, we just plug XNA pitch into f(x).*/
 
-            if (xnaPitch < -1.0f || xnaPitch > 1.0f)
-                throw new ArgumentOutOfRangeException("XNA PITCH MUST BE WITHIN [-1.0f, 1.0f]!");
+            // XNA pitch range, but we're not using limits even on Windows //Debug
+            //if (xnaPitch < -1.0f || xnaPitch > 1.0f)
+            //    throw new ArgumentOutOfRangeException("XNA PITCH MUST BE WITHIN [-1.0f, 1.0f]!");
 
             return (float)Math.Pow(2, xnaPitch);
         }
@@ -119,9 +119,18 @@ namespace Microsoft.Xna.Framework.Audio
             SourceId = controller.ReserveSource();
             HasSourceId = true;
 
-            int bufferId = _effect.SoundBuffer.OpenALDataBuffer;
-            AL.Source(SourceId, ALSourcei.Buffer, bufferId);
-            ALHelper.CheckError("Failed to bind buffer to source.");
+            if (_effect.SoundBuffer is OALSoundBufferStreamed)
+            {
+                (_effect.SoundBuffer as OALSoundBufferStreamed)
+                    .QueueStreamBuffers(SourceId);
+                ALHelper.CheckError("Failed to queue stream buffers to source.");
+            }
+            else
+            {
+                int bufferId = _effect.SoundBuffer.OpenALDataBuffer;
+                AL.Source(SourceId, ALSourcei.Buffer, bufferId);
+                ALHelper.CheckError("Failed to bind buffer to source.");
+            }
 
             // Send the position, gain, looping, pitch, and distance model to the OpenAL driver.
             if (!HasSourceId)
@@ -136,12 +145,18 @@ namespace Microsoft.Xna.Framework.Audio
 			// Volume
 			AL.Source (SourceId, ALSourcef.Gain, _alVolume);
             ALHelper.CheckError("Failed to set source volume.");
-			// Looping
-			AL.Source (SourceId, ALSourceb.Looping, IsLooped);
-            ALHelper.CheckError("Failed to set source loop state.");
 			// Pitch
 			AL.Source (SourceId, ALSourcef.Pitch, XnaPitchToAlPitch(_pitch));
             ALHelper.CheckError("Failed to set source pitch.");
+            // Looping
+            if (_effect.SoundBuffer is OALSoundBufferStreamed)
+            {
+                AL.Source(SourceId, ALSourceb.Looping, false);
+                (_effect.SoundBuffer as OALSoundBufferStreamed).StreamedLoop = IsLooped;
+            }
+            else
+                AL.Source(SourceId, ALSourceb.Looping, IsLooped);
+            ALHelper.CheckError("Failed to set source loop state.");
 
             controller.PlaySound (this);
             //Console.WriteLine ("playing: " + sourceId + " : " + soundEffect.Name);
@@ -231,7 +246,7 @@ namespace Microsoft.Xna.Framework.Audio
         private SoundState PlatformGetState()
         {
             if (!HasSourceId)
-                return SoundState.Stopped;
+                return SoundState.Initial;
             
             var alState = AL.GetSourceState(SourceId);
             ALHelper.CheckError("Failed to get source state.");
@@ -239,6 +254,9 @@ namespace Microsoft.Xna.Framework.Audio
             switch (alState)
             {
                 case ALSourceState.Initial:
+                    SoundState = SoundState.Initial;
+                    break;
+
                 case ALSourceState.Stopped:
                     SoundState = SoundState.Stopped;
                     break;
@@ -268,7 +286,7 @@ namespace Microsoft.Xna.Framework.Audio
 
         private void PlatformDispose(bool disposing)
         {
-            
+            PlatformStop(true);
         }
     }
 }

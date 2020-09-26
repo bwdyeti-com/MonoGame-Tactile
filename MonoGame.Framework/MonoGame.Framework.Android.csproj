@@ -80,10 +80,12 @@
     <Compile Include="Android\MonoGameAndroidGameView.cs" />
     <Compile Include="Audio\AudioLoader.cs" />
     <Compile Include="Audio\OALSoundBuffer.cs" />
+    <Compile Include="Audio\OALSoundBufferStreamed.cs" />
     <Compile Include="Audio\OpenALSoundController.cs" />
     <Compile Include="Audio\SoundEffect.OpenAL.cs" />
     <Compile Include="Audio\SoundEffectInstance.OpenAL.cs" />
     <Compile Include="Audio\SoundEffectInstancePool.cs" />
+    <Compile Include="Audio\SoundEffectStreamed.cs" />
     <Compile Include="FrameworkResources.cs" />
     <Compile Include="GamePlatform.Mobile.cs" />
     <Compile Include="GamerServices\GuideAlreadyVisibleException.cs" />

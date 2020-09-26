@@ -45,6 +45,8 @@ namespace Microsoft.Xna.Framework.Audio
     /// <summary>Described the playback state of a SoundEffectInstance.</summary>
     public enum SoundState
     {
+        /// <summary>The SoundEffectInstance has not started or failed to start.</summary>
+        Initial,
         /// <summary>The SoundEffectInstance is currently playing.</summary>
         Playing,
         /// <summary>The SoundEffectInstance is currently paused.</summary>
