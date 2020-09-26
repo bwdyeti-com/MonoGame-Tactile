@@ -5,7 +5,6 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Drawing;
 using MonoGame.Utilities.Png;
 
 #if MONOMAC
@@ -53,6 +52,7 @@ using Android.Graphics;
 #endif // OPENGL
 
 #if DESKTOPGL || MONOMAC || ANGLE
+using System.Drawing; //@Debug: conflicts with Android.Graphics, so no longer at the top
 using System.Drawing.Imaging;
 #endif
 
