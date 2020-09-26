@@ -13,6 +13,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// The reserved touchId for all mouse touch points.
         /// </summary>
         private const int MouseTouchId = 1;
+        private const int FirstNonMouseId = 3;
 
         /// <summary>
         /// The current touch state.
@@ -36,9 +37,9 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
         /// <summary>
         /// The next touch location identifier.
-        /// The value 1 is reserved for the mouse touch point.
+        /// The values 1 and 2 are reserved for the mouse touch point.
         /// </summary>
-        private int _nextTouchId = 2;
+        private int _nextTouchId = FirstNonMouseId;
 
         /// <summary>
         /// The current timestamp that we use for setting the timestamp of new TouchLocations
@@ -92,8 +93,27 @@ namespace Microsoft.Xna.Framework.Input.Touch
                 switch (touch.State)
                 {
                     case TouchLocationState.Released:
+                        // Remove Moved state touches that are older than this one
+                        for (int j = i + 1; j < state.Count; j++)
+                        {
+                            var olderTouch = state[j];
+                            if (olderTouch.Id == touch.Id &&
+                                    olderTouch.State == TouchLocationState.Moved &&
+                                    olderTouch.Timestamp <= touch.Timestamp)
+                                state.RemoveAt(j);
+#if TOUCH_DISPOSE_LOGGING
+                            Console.WriteLine(string.Format(
+                                "Moved ({0} left): removed in AgeTouches()", state.Count));
+#endif
+                        }
+
                         state.RemoveAt(i);
+#if TOUCH_DISPOSE_LOGGING
+                        Console.WriteLine(string.Format(
+                            "Released ({0} left): removed in AgeTouches()", state.Count));
+#endif
                         break;
+                    // Ages a press state into moved or released
                     case TouchLocationState.Pressed:
                     case TouchLocationState.Moved:
                         touch.AgeState();
@@ -111,6 +131,10 @@ namespace Microsoft.Xna.Framework.Input.Touch
             if (touch.State == TouchLocationState.Pressed)
             {
                 state.Add(touch);
+#if TOUCH_DISPOSE_LOGGING
+                Console.WriteLine(string.Format(
+                    "Pressed ({0} left): added in ApplyTouch()", state.Count));
+#endif
                 return;
             }
 
@@ -122,9 +146,15 @@ namespace Microsoft.Xna.Framework.Input.Touch
                 if (existingTouch.Id == touch.Id)
                 {
                     //If we are moving straight from Pressed to Released and we've existed for multiple frames, that means we've never been seen, so just get rid of us
-                    if (existingTouch.State == TouchLocationState.Pressed && touch.State == TouchLocationState.Released && existingTouch.PressTimestamp != touch.Timestamp)
+                    if (existingTouch.State == TouchLocationState.Pressed &&
+                        touch.State == TouchLocationState.Released &&
+                        existingTouch.PressTimestamp != touch.Timestamp)
                     {
                         state.RemoveAt(i);
+#if TOUCH_DISPOSE_LOGGING
+                        Console.WriteLine(string.Format(
+                            "Pressed ({0} left): removed in ApplyTouch()", state.Count));
+#endif
                     }
                     else
                     {
@@ -146,9 +176,15 @@ namespace Microsoft.Xna.Framework.Input.Touch
                 var touch = _touchState[i];
 
                 //If a touch was pressed and released in a previous frame and the user didn't ask about it then trash it.
-                if (touch.SameFrameReleased && touch.Timestamp < CurrentTimestamp && touch.State == TouchLocationState.Pressed)
+                if (touch.SameFrameReleased &&
+                    touch.Timestamp < CurrentTimestamp &&
+                    touch.State == TouchLocationState.Pressed)
                 {
                     _touchState.RemoveAt(i);
+#if TOUCH_DISPOSE_LOGGING
+                    Console.WriteLine(string.Format(
+                        "Pressed ({0} left): removed in GetState()", _touchState.Count));
+#endif
                 }
             }
 
@@ -162,7 +198,8 @@ namespace Microsoft.Xna.Framework.Input.Touch
             AddEvent(id, state, position, false);
         }
 
-        internal void AddEvent(int id, TouchLocationState state, Vector2 position, bool isMouse)
+        internal void AddEvent(int id,
+            TouchLocationState state, Vector2 position, bool isMouse)
         {
             // Different platforms return different touch identifiers
             // based on the specifics of their implementation and the
@@ -180,8 +217,14 @@ namespace Microsoft.Xna.Framework.Input.Touch
             {
                 if (isMouse)
                 {
+#if DEBUG
+                    if (MouseTouchId + id >= FirstNonMouseId)
+                        throw new ArgumentException(string.Format(
+                            "Mouse touch ids must be less than {0}",
+                            FirstNonMouseId - MouseTouchId));
+#endif
                     // Mouse pointing devices always use a reserved Id
-                    _touchIds[id] = MouseTouchId;
+                    _touchIds[id] = MouseTouchId + id;
                 }
                 else
                 {
@@ -352,7 +395,13 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// </summary>
         internal const float TapJitterTolerance = 35.0f;
 
-        internal static readonly TimeSpan TimeRequiredForHold = TimeSpan.FromMilliseconds(1024);
+        /// <summary>
+        /// Time in milliseconds between two taps for a double tap to register.
+        /// </summary>
+        internal static readonly TimeSpan DoubleTapTimeThreshold = TimeSpan.FromMilliseconds(300);
+
+        internal static readonly TimeSpan TimeRequiredForShortHold = TimeSpan.FromMilliseconds(400);
+        internal static readonly TimeSpan TimeRequiredForHold = TimeSpan.FromMilliseconds(800);
 
         /// <summary>
         /// The pinch touch locations.
@@ -581,10 +630,9 @@ namespace Microsoft.Xna.Framework.Input.Touch
             if (dist > TapJitterTolerance)
                 return false;
 
-            // Check that this tap happened within the standard 
-            // double tap time threshold of 300 milliseconds.
+            // Check that this tap happened within the double tap time threshold.
             var elapsed = touch.Timestamp - _lastTap.Timestamp;
-            if (elapsed.TotalMilliseconds > 300)
+            if (elapsed > DoubleTapTimeThreshold)
                 return false;
 
             GestureList.Enqueue(new GestureSample(
@@ -620,6 +668,19 @@ namespace Microsoft.Xna.Framework.Input.Touch
             // Store the last tap for 
             // double tap processing.
             _lastTap = touch;
+
+            // If held long enough for a short hold, fire that instead
+            if (elapsed > TimeRequiredForShortHold &&
+                GestureIsEnabled(GestureType.ShortHold))
+            {
+                var shortHold = new GestureSample(
+                    GestureType.ShortHold, touch.Timestamp,
+                    touch.Position, Vector2.Zero,
+                    Vector2.Zero, Vector2.Zero);
+                GestureList.Enqueue(shortHold);
+
+                return;
+            }
 
             // Fire off the tap event immediately.
             if (GestureIsEnabled(GestureType.Tap))
@@ -740,5 +801,10 @@ namespace Microsoft.Xna.Framework.Input.Touch
         }
 
         #endregion
+
+        public static bool DoubleTapThresholdElapsed(GestureSample sample)
+        {
+            return (CurrentTimestamp - sample.Timestamp) > DoubleTapTimeThreshold;
+        }
     }
 }
