@@ -98,6 +98,11 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// The user touched the screen and performed either top to bottom or bottom to top drag gesture.
         /// </summary>
         VerticalDrag = 512,
+
+        /// <summary>
+        /// The user touched a single point for approximately a half second.
+        /// </summary>
+        ShortHold = 1024,
     }
 }
 
