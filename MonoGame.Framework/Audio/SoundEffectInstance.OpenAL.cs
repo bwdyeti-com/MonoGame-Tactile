@@ -3,6 +3,7 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
+using Microsoft.Xna.Framework;
 
 #if MONOMAC && PLATFORM_MACOS_LEGACY
 using MonoMac.OpenAL;
@@ -10,7 +11,11 @@ using MonoMac.OpenAL;
 using OpenTK.Audio.OpenAL;
 #endif
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     public partial class SoundEffectInstance //@Debug: : IDisposable
     {

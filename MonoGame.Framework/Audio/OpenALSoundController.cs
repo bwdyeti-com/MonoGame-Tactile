@@ -25,7 +25,11 @@ using AudioToolbox;
 using AVFoundation;
 #endif
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     internal static class ALHelper
     {

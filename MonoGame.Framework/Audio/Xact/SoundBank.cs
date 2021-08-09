@@ -6,9 +6,18 @@ using System;
 using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
+#if XNA
+using Microsoft.Xna.Framework;
+using MonoGame.Framework.Utilities;
+#else
 using Microsoft.Xna.Framework.Utilities;
+#endif
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     /// <summary>Represents a collection of Cues.</summary>
     public class SoundBank : IDisposable

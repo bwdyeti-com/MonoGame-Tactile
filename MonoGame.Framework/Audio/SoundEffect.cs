@@ -7,7 +7,11 @@
 using System;
 using System.IO;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     /// <summary>Represents a loaded sound resource.</summary>
     /// <remarks>

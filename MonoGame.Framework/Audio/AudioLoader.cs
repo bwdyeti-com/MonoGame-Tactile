@@ -2,7 +2,11 @@ using System;
 using System.IO;
 using OpenTK.Audio.OpenAL;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     internal class AudioLoader
     {

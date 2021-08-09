@@ -5,7 +5,11 @@
 using System;
 using System.IO;
 
+#if XNA
+namespace MonoGame.Framework.Utilities
+#else
 namespace Microsoft.Xna.Framework.Utilities
+#endif
 {
     internal static class FileHelpers
     {

@@ -9,7 +9,11 @@ using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     /// <summary>
     /// Class used to create and manipulate code audio objects.

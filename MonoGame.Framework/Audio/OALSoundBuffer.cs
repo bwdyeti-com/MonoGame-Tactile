@@ -10,9 +10,13 @@ using MonoMac.OpenAL;
 using OpenTK.Audio.OpenAL;
 #endif
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
-	internal class OALSoundBuffer : IDisposable
+    internal class OALSoundBuffer : IDisposable
 	{
 		protected int openALDataBuffer;
 		protected ALFormat openALFormat;

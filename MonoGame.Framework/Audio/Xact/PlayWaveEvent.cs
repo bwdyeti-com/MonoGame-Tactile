@@ -4,8 +4,13 @@
 
 using System;
 using System.IO;
+using Microsoft.Xna.Framework;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     enum VariationType
     {

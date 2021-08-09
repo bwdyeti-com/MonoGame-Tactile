@@ -4,7 +4,11 @@
 
 using System;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     /// <summary>Manages the playback of a sound or set of sounds.</summary>
     /// <remarks>

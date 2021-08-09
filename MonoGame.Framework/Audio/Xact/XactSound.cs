@@ -5,9 +5,13 @@
 using System;
 using System.IO;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
-	class XactSound
+    class XactSound
 	{
 		private readonly bool _complexSound;
         private readonly XactClip[] _soundClips;

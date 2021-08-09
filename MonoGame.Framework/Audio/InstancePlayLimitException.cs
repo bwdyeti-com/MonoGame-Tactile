@@ -6,7 +6,11 @@ using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     /// <summary>
     /// The exception thrown when the system attempts to play more SoundEffectInstances than allotted.

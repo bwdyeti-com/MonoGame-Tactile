@@ -19,9 +19,13 @@ using System.IO;
 
 // TODO: Method to extract header data
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
-	internal class MSADPCMToPCM {
+    internal class MSADPCMToPCM {
 
 		/**
 		 * A bunch of magical numbers that predict the sample data from the
