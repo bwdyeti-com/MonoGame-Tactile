@@ -36,7 +36,7 @@
     <OutputPath>bin\WindowsGL\Release\</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DefineConstants>TRACE;WINDOWS;XNA;OPENGL</DefineConstants>
+    <DefineConstants>TRACE;WINDOWS;XNA;OPENGL;OPENAL</DefineConstants>
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
