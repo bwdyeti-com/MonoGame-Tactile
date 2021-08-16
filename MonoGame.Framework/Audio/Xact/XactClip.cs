@@ -4,10 +4,15 @@
 
 using System;
 using System.IO;
+using Microsoft.Xna.Framework;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
-	class XactClip
+    class XactClip
 	{
         private readonly float _defaultVolume;
         private float _volumeScale;

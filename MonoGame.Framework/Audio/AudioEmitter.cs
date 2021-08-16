@@ -3,10 +3,13 @@
 // file 'LICENSE.txt', which is part of this source code package.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.Xna.Framework;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     /// <summary>
     /// Represents a 3D audio emitter. Used to simulate 3D audio effects.

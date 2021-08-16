@@ -4,9 +4,13 @@
 
 using System;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
-	static class XactHelpers
+    static class XactHelpers
 	{
         static internal readonly Random Random = new Random();
 

@@ -4,7 +4,11 @@
 
 using System;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     /// <summary>
     /// Represents how many channels are used in the audio data.

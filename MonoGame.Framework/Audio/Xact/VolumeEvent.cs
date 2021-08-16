@@ -5,9 +5,13 @@
 using System;
 using System.IO;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
-	class VolumeEvent : ClipEvent
+    class VolumeEvent : ClipEvent
 	{
 	    private readonly float _volume;
 

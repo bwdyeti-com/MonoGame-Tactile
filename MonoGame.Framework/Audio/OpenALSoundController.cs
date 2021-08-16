@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Runtime.InteropServices;
-using MonoGame.Utilities;
 
 #if MONOMAC && PLATFORM_MACOS_LEGACY
 using MonoMac.OpenAL;
@@ -25,7 +24,11 @@ using AudioToolbox;
 using AVFoundation;
 #endif
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     internal static class ALHelper
     {
@@ -68,7 +71,7 @@ namespace Microsoft.Xna.Framework.Audio
         // Reference: http://stackoverflow.com/questions/3894044/maximum-number-of-openal-sound-buffers-on-iphone
         internal const int MAX_NUMBER_OF_SOURCES = 32;
 
-#elif ANDROID
+#elif ANDROID || OPENAL
 
         // Set to the same as OpenAL on iOS
         internal const int MAX_NUMBER_OF_SOURCES = 32;

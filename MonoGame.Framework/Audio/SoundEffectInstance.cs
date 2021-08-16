@@ -6,7 +6,11 @@
 
 using System;
 
+#if XNA
+namespace MonoGame.Framework.Audio
+#else
 namespace Microsoft.Xna.Framework.Audio
+#endif
 {
     /// <summary>Represents a single instance of a playing, paused, or stopped sound.</summary>
     /// <remarks>

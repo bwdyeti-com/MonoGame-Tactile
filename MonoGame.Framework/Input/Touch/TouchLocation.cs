@@ -239,7 +239,9 @@ namespace Microsoft.Xna.Framework.Input.Touch
             }
 
             //Going straight from pressed to released on the same frame
-            if (_previousState == TouchLocationState.Pressed && _state == TouchLocationState.Released && elapsed == TimeSpan.Zero)
+            if (_previousState == TouchLocationState.Pressed &&
+                _state == TouchLocationState.Released &&
+                elapsed == TimeSpan.Zero)
             {
                 //Lie that we are pressed for now
                 SameFrameReleased = true;

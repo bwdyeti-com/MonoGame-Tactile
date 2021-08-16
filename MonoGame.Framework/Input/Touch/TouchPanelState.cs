@@ -44,11 +44,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// <summary>
         /// The current timestamp that we use for setting the timestamp of new TouchLocations
         /// </summary>
-#if false //@Debug
-        internal static TimeSpan CurrentTimestamp { get; set; }
-#else
         public static TimeSpan CurrentTimestamp { get; set; }
-#endif
 
         /// <summary>
         /// The mapping between platform specific touch ids
@@ -60,12 +56,24 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
         private TouchPanelCapabilities Capabilities = new TouchPanelCapabilities();
 
+#if !XNA
         internal readonly GameWindow Window;
 
         internal TouchPanelState(GameWindow window)
         {
             Window = window;
         }
+#else
+        /// <summary>
+        /// The current size of the display.
+        /// </summary>
+        private Point _windowSize = Point.Zero;
+
+        internal TouchPanelState(Point windowSize)
+        {
+            _windowSize = windowSize;
+        }
+#endif
 
         /// <summary>
         /// The window handle of the touch panel. Purely for Xna compatibility.
@@ -272,7 +280,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         private void UpdateTouchScale()
         {
             // Get the window size.
-            var windowSize = new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height);
+            var windowSize = this.WindowSize;
 
             // Recalculate the touch scale.
             _touchScale = new Vector2(  _displaySize.X / windowSize.X,
@@ -346,6 +354,29 @@ namespace Microsoft.Xna.Framework.Input.Touch
                 _displaySize.X = value;
                 UpdateTouchScale();
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the display height of the touch panel.
+        /// </summary>
+        public Vector2 WindowSize
+        {
+            get
+            {
+#if !XNA
+                return new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height);
+#else
+                return new Vector2(_windowSize.X, _windowSize.Y);
+#endif
+            }
+#if !XNA
+#else
+            set
+            {
+                _windowSize = new Point((int)value.X, (int)value.Y);
+                UpdateTouchScale();
+            }
+#endif
         }
 
         /// <summary>
