@@ -831,5 +831,10 @@ namespace Microsoft.Xna.Framework.Input.Touch
         {
             return (CurrentTimestamp - sample.Timestamp) > DoubleTapTimeThreshold;
         }
+
+        public void ResetDoubleTap()
+        {
+            _lastTap = TouchLocation.Invalid;
+        }
     }
 }
