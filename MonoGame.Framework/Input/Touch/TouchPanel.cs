@@ -159,5 +159,10 @@ namespace Microsoft.Xna.Framework.Input.Touch
         {
             get { return PrimaryWindow.TouchPanelState.IsGestureAvailable; }
         }
+
+        public static void ResetDoubleTap()
+        {
+            PrimaryWindow.TouchPanelState.ResetDoubleTap();
+        }
     }
 }
