@@ -694,6 +694,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
         }
 
         private GestureType _dragGestureStarted = GestureType.None;
+        private Vector2 _dragGestureStartLoc;
 
         private void ProcessDrag(TouchLocation touch)
         {
@@ -718,6 +719,12 @@ namespace Microsoft.Xna.Framework.Input.Touch
                 var isHorizontalDelta = Math.Abs(delta.X) > Math.Abs(delta.Y * 2.0f);
                 var isVerticalDelta = Math.Abs(delta.Y) > Math.Abs(delta.X * 2.0f);
                 var classify = _dragGestureStarted == GestureType.None;
+
+                // Get the starting position of the drag to store as Position2
+                if (classify)
+                {
+                    _dragGestureStartLoc = prevTouch.Position;
+                }
 
                 // Once we enter either vertical or horizontal drags
                 // we stick to it... regardless of the delta.
@@ -755,7 +762,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
             GestureList.Enqueue(new GestureSample(
                                     _dragGestureStarted, touch.Timestamp,
-                                    touch.Position, Vector2.Zero,
+                                    touch.Position, _dragGestureStartLoc,
                                     delta, Vector2.Zero));
         }
 
