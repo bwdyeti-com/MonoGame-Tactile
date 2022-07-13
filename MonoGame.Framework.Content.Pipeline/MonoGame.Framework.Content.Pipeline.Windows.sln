@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31911.196
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.Content.Pipeline.Windows", "MonoGame.Framework.Content.Pipeline.Windows.csproj", "{B950DE10-AC5D-4BD9-B817-51247C4A732D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Framework.WindowsGL", "..\MonoGame.Framework\MonoGame.Framework.WindowsGL.csproj", "{6D75E618-19CA-4C51-9546-F10965FBC0B8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B950DE10-AC5D-4BD9-B817-51247C4A732D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B950DE10-AC5D-4BD9-B817-51247C4A732D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B950DE10-AC5D-4BD9-B817-51247C4A732D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B950DE10-AC5D-4BD9-B817-51247C4A732D}.Debug|x86.Build.0 = Debug|Any CPU
+		{B950DE10-AC5D-4BD9-B817-51247C4A732D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B950DE10-AC5D-4BD9-B817-51247C4A732D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B950DE10-AC5D-4BD9-B817-51247C4A732D}.Release|x86.ActiveCfg = Release|Any CPU
+		{B950DE10-AC5D-4BD9-B817-51247C4A732D}.Release|x86.Build.0 = Release|Any CPU
+		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Debug|Any CPU.Build.0 = Debug|x86
+		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Debug|x86.ActiveCfg = Debug|x86
+		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Debug|x86.Build.0 = Debug|x86
+		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Release|x86.ActiveCfg = Release|x86
+		{6D75E618-19CA-4C51-9546-F10965FBC0B8}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E7494FD3-0684-4922-ADBC-5C773CD355CE}
+	EndGlobalSection
+EndGlobal
