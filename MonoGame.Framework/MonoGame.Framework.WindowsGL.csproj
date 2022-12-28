@@ -64,10 +64,6 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NVorbis, Version=0.8.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\NVorbis\bin\x86\Release\NVorbis.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Core" />
@@ -576,7 +572,12 @@
       <Services>_XNADesignProvided</Services>
     </Compile>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\NVorbis\NVorbis.csproj">
+      <Project>{a372e591-dfef-49c4-9c82-98c4361efccd}</Project>
+      <Name>NVorbis</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <None Include="..\ThirdParty\Dependencies\OpenTK.dll.config">
       <Platforms>WindowsGL,Linux,MacOS</Platforms>
