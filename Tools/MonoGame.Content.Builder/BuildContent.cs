@@ -12,7 +12,7 @@ using MonoGame.Framework.Content.Pipeline.Builder;
 
 namespace MonoGame.Content.Builder
 {
-    class BuildContent
+    public class BuildContent
     {
         [CommandLineParameter(
             Name = "launchdebugger",
