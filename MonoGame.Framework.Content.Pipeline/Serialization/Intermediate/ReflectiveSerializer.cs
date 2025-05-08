@@ -117,7 +117,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
                 _baseSerializer = serializer.GetTypeSerializer(TargetType.BaseType);
 
             // Cache all our serializable properties.
-            var properties = TargetType.GetProperties(_bindingFlags);
+            var properties = TargetType.GetProperties(_bindingFlags)
+                .OrderBy(x => x.MetadataToken)
+                .ToArray();
             foreach (var prop in properties)
             {
                 ElementInfo info;
@@ -126,7 +128,9 @@ namespace Microsoft.Xna.Framework.Content.Pipeline.Serialization.Intermediate
             }
 
             // Cache all our serializable fields.
-            var fields = TargetType.GetFields(_bindingFlags);
+            var fields = TargetType.GetFields(_bindingFlags)
+                .OrderBy(x => x.MetadataToken)
+                .ToArray();
             foreach (var field in fields)
             {
                 ElementInfo info;

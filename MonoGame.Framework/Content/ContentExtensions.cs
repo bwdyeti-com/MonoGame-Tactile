@@ -35,7 +35,9 @@ namespace Microsoft.Xna.Framework.Content
             return nonStaticPropertyInfos.ToArray();
 #else
             const BindingFlags attrs = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-            var allProps = type.GetProperties(attrs).ToList();
+            var allProps = type.GetProperties(attrs)
+                .OrderBy(x => x.MetadataToken)
+                .ToList();
             var props = allProps.FindAll(p => p.GetGetMethod(true) != null && p.GetGetMethod(true) == p.GetGetMethod(true).GetBaseDefinition()).ToArray();
             return props;
 #endif
@@ -52,7 +54,9 @@ namespace Microsoft.Xna.Framework.Content
             return nonStaticFields.ToArray();
 #else
             var attrs = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-            return type.GetFields(attrs);
+            return type.GetFields(attrs)
+                .OrderBy(x => x.MetadataToken)
+                .ToArray();
 #endif
         }
 
