@@ -53,7 +53,8 @@ namespace MonoGame.Content.Builder
 
             // Let the content build.
             int successCount, errorCount;
-            content.Build(out successCount, out errorCount);
+            string[] errorMessages;
+            content.Build(out successCount, out errorCount, out errorMessages);
 
             // Print the finishing info.
             if (!content.Quiet)

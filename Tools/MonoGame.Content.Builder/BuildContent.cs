@@ -281,7 +281,7 @@ namespace MonoGame.Content.Builder
                 .Replace("$(Profile)", this.Profile.ToString());
         }
 
-        public void Build(out int successCount, out int errorCount)
+        public void Build(out int successCount, out int errorCount, out string[] errorMessages)
         {
             var projectDirectory = PathHelper.Normalize(Directory.GetCurrentDirectory());
 
@@ -351,6 +351,8 @@ namespace MonoGame.Content.Builder
             };
             errorCount = 0;
             successCount = 0;
+            errorMessages = new string[0];
+            List<string> errors = new List<string>();
 
             // Before building the content, register all files to be built. (Necessary to
             // correctly resolve external references.)
@@ -393,6 +395,7 @@ namespace MonoGame.Content.Builder
                     }
                     message += ex.Message;
                     Console.WriteLine(message);
+                    errors.Add(FormatErrorMessage(ex));
                     ++errorCount;
                 }
                 catch (PipelineException ex)
@@ -400,6 +403,7 @@ namespace MonoGame.Content.Builder
                     Console.Error.WriteLine("{0}: error: {1}", c.SourceFile, ex.Message);
                     if (ex.InnerException != null)
                         Console.Error.WriteLine(ex.InnerException.ToString());
+                    errors.Add(FormatErrorMessage(ex));
                     ++errorCount;
                 }
                 catch (Exception ex)
@@ -407,6 +411,7 @@ namespace MonoGame.Content.Builder
                     Console.Error.WriteLine("{0}: error: {1}", c.SourceFile, ex.Message);
                     if (ex.InnerException != null)
                         Console.Error.WriteLine(ex.InnerException.ToString());
+                    errors.Add(FormatErrorMessage(ex));
                     ++errorCount;
                 }
             }
@@ -493,12 +498,15 @@ namespace MonoGame.Content.Builder
                     if (ex.InnerException != null)
                         Console.Error.WriteLine(ex.InnerException.ToString());
 
+                    errors.Add(FormatErrorMessage(ex));
                     ++errorCount;
                 }
             }
 
             // Dump the content build stats.
             _manager.ContentStats.Write(intermediatePath);
+
+            errorMessages = errors.ToArray();
         }
 
         [CommandLineParameter(
@@ -508,6 +516,21 @@ namespace MonoGame.Content.Builder
         public void Help()
         {
             MGBuildParser.Instance.ShowError(null);
+        }
+
+        private string FormatErrorMessage(Exception ex)
+        {
+            if (ex.InnerException != null)
+            {
+                return string.Format("{0}: {1}\n\t-- {2}: {3}",
+                    ex.GetType(), ex.Message,
+                    ex.InnerException.GetType(), ex.InnerException.Message);
+            }
+            else
+            {
+                return string.Format("{0}: {1}",
+                    ex.GetType(), ex.Message);
+            }
         }
     }
 }
