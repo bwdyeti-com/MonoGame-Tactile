@@ -55,6 +55,19 @@ namespace Microsoft.Xna.Framework
             }
         }
 
+        public override bool MinimizeFullscreenOnFocusLost
+        {
+            get
+            {
+                return _minimizeWithoutFocus;
+            }
+            set
+            {
+                _minimizeWithoutFocus = value;
+                RefreshMinimizeWithoutFocus();
+            }
+        }
+
         public override DisplayOrientation CurrentOrientation
         {
             get { return DisplayOrientation.Default; }
@@ -82,12 +95,13 @@ namespace Microsoft.Xna.Framework
 
         public static GameWindow Instance;
         public uint? Id;
-        public bool IsFullScreen;
+        public bool IsFullScreen { get; private set; }
 
         internal readonly Game _game;
         private IntPtr _handle, _icon;
         private bool _disposed;
         private bool _resizable, _borderless, _willBeFullScreen, _mouseVisible, _hardwareSwitch;
+        private bool _minimizeWithoutFocus;
         private string _screenDeviceName;
         private int _width, _height;
         private bool _wasMoved, _supressMoved;
@@ -102,7 +116,7 @@ namespace Microsoft.Xna.Framework
             _width = GraphicsDeviceManager.DefaultBackBufferWidth;
             _height = GraphicsDeviceManager.DefaultBackBufferHeight;
 
-            Sdl.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0");
+            RefreshMinimizeWithoutFocus();
             Sdl.SetHint("SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS", "1");
 
             // when running NUnit tests entry assembly can be null
@@ -224,7 +238,7 @@ namespace Microsoft.Xna.Framework
             // If going to exclusive full-screen mode, force the window to minimize on focus loss (Windows only)
             if (CurrentPlatform.OS == OS.Windows)
             {
-                Sdl.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", _willBeFullScreen && _hardwareSwitch ? "1" : "0");
+                RefreshMinimizeWithoutFocus();
             }
 
             if (!_willBeFullScreen || _game.graphicsDeviceManager.HardwareModeSwitch)
@@ -308,6 +322,15 @@ namespace Microsoft.Xna.Framework
         protected override void SetTitle(string title)
         {
             Sdl.Window.SetTitle(_handle, title);
+        }
+
+        private void RefreshMinimizeWithoutFocus()
+        {
+            if (_willBeFullScreen && _hardwareSwitch)
+                Sdl.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "1");
+            else
+                Sdl.SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS",
+                _minimizeWithoutFocus ? "1" : "0");
         }
 
         public void Dispose()

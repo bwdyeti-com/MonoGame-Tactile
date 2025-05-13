@@ -42,10 +42,17 @@ namespace Microsoft.Xna.Framework
         public abstract Point Position { get; set; }
 #endif
 
-	    /// <summary>
-	    /// The display orientation on a mobile device.
-	    /// </summary>
-		public abstract DisplayOrientation CurrentOrientation { get; }
+#if DESKTOPGL
+        /// <summary>
+        /// If true, the game window should minimize on losing focus.
+        /// </summary>
+        public abstract bool MinimizeFullscreenOnFocusLost { get; set; }
+#endif
+
+        /// <summary>
+        /// The display orientation on a mobile device.
+        /// </summary>
+        public abstract DisplayOrientation CurrentOrientation { get; }
 
 	    /// <summary>
 	    /// The handle to the window used by the backend windowing service.
