@@ -12,6 +12,9 @@ namespace Microsoft.Xna.Framework.Audio
     /// </remarks>
     public partial class SoundEffectInstance : IDisposable
     {
+        public static float MINIMUM_PITCH = -1.0f;
+        public static float MAXIMUM_PITCH = 1.0f;
+
         private bool _isDisposed = false;
         internal bool _isPooled = true;
         internal bool _isXAct;
@@ -52,7 +55,7 @@ namespace Microsoft.Xna.Framework.Audio
             set
             {
                 // XAct sounds effects don't have pitch limits
-                if (!_isXAct && (value < -1.0f || value > 1.0f))
+                if (!_isXAct && (value < MINIMUM_PITCH || value > MAXIMUM_PITCH))
                     throw new ArgumentOutOfRangeException();
 
                 _pitch = value;
