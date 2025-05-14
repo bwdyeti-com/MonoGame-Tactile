@@ -160,6 +160,14 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         public event EventHandler<InputKeyEventArgs> KeyUp;
 
+        /// <summary>
+		/// This event is raised immediately after the game window is created and shown.
+		/// </summary>
+		/// <remarks>
+		/// This event is only supported on desktop platforms.
+		/// </remarks>
+        public event EventHandler<EventArgs> Shown;
+
 #endif
 
         #endregion Events
@@ -247,6 +255,10 @@ namespace Microsoft.Xna.Framework
 	    {
             EventHelpers.Raise(this, KeyUp, e);
 	    }
+        internal void OnShown(EventArgs e)
+        {
+            EventHelpers.Raise(this, Shown, e);
+        }
 #endif
 
 		protected internal abstract void SetSupportedOrientations (DisplayOrientation orientations);
