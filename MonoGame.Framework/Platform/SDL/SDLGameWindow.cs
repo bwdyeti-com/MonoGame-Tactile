@@ -122,19 +122,20 @@ namespace Microsoft.Xna.Framework
             // when running NUnit tests entry assembly can be null
             if (Assembly.GetEntryAssembly() != null)
             {
-                using (
-                    var stream =
-                        Assembly.GetEntryAssembly().GetManifestResourceStream(Assembly.GetEntryAssembly().EntryPoint.DeclaringType.Namespace + ".Icon.bmp") ??
-                        Assembly.GetEntryAssembly().GetManifestResourceStream("Icon.bmp") ??
-                        Assembly.GetExecutingAssembly().GetManifestResourceStream("MonoGame.bmp"))
+                using (var stream = GetIconStream())
                 {
                     if (stream != null)
                         using (var br = new BinaryReader(stream))
                         {
                             try
                             {
-                                var src = Sdl.RwFromMem(br.ReadBytes((int)stream.Length), (int)stream.Length);
-                                _icon = Sdl.LoadBMP_RW(src, 1);
+                                var loader = new StbImageSharp.ImageStreamLoader();
+                                var imageResult = loader.Load(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+
+                                _icon = Sdl.CreateRGBSurfaceFrom(
+                                    imageResult.Data, imageResult.Width, imageResult.Height,
+                                    32, imageResult.Width * 4,
+                                    0x000000ff, 0x0000FF00, 0x00FF0000, 0xFF000000);
                             }
                             catch { }
                         }
@@ -144,6 +145,25 @@ namespace Microsoft.Xna.Framework
             _handle = Sdl.Window.Create("", 0, 0,
                 GraphicsDeviceManager.DefaultBackBufferWidth, GraphicsDeviceManager.DefaultBackBufferHeight,
                 Sdl.Window.State.Hidden | Sdl.Window.State.FullscreenDesktop);
+        }
+
+        private Stream GetIconStream()
+        {
+            // Try to load a png icon first
+            Stream pngStream = Assembly.GetEntryAssembly().GetManifestResourceStream(
+                    Assembly.GetEntryAssembly().EntryPoint.DeclaringType.Namespace + ".Icon.png") ??
+                Assembly.GetEntryAssembly().GetManifestResourceStream("Icon.png");
+            if (pngStream != null)
+            {
+                return pngStream;
+            }
+
+            // Find a bmp icon
+            // otherwise return the MonoGame default
+            return Assembly.GetEntryAssembly().GetManifestResourceStream(
+                    Assembly.GetEntryAssembly().EntryPoint.DeclaringType.Namespace + ".Icon.bmp") ??
+                Assembly.GetEntryAssembly().GetManifestResourceStream("Icon.bmp") ??
+                Assembly.GetExecutingAssembly().GetManifestResourceStream("MonoGame.bmp");
         }
 
         internal void CreateWindow()
