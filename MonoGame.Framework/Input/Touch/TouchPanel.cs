@@ -78,6 +78,13 @@ namespace Microsoft.Xna.Framework.Input.Touch
             PrimaryWindow.TouchPanelState.AddEvent(id, state, position, isMouse);
         }
 
+#if DESKTOPGL
+        public static void AddEmulatedEvent(int id, TouchLocationState state, Vector2 position)
+        {
+            AddEvent(id, state, position, true);
+        }
+#endif
+
         /// <summary>
         /// Returns the next available gesture on touch panel device.
         /// </summary>

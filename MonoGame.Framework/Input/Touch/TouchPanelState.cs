@@ -43,7 +43,11 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// <summary>
         /// The current timestamp that we use for setting the timestamp of new TouchLocations
         /// </summary>
+#if DESKTOPGL
+        public static TimeSpan CurrentTimestamp { get; set; }
+#else
         internal static TimeSpan CurrentTimestamp { get; set; }
+#endif
 
         /// <summary>
         /// The mapping between platform specific touch ids
@@ -226,12 +230,16 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
         private void UpdateTouchScale()
         {
+#if DESKTOPGL
+            _touchScale = Vector2.One;
+#else
             // Get the window size.
             var windowSize = new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height);
 
             // Recalculate the touch scale.
             _touchScale = new Vector2(  _displaySize.X / windowSize.X,
                                         _displaySize.Y / windowSize.Y);
+#endif
         }
 
         /// <summary>
