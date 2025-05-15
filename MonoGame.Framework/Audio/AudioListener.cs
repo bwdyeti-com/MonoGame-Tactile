@@ -2,19 +2,20 @@
 // This file is subject to the terms and conditions defined in
 // file 'LICENSE.txt', which is part of this source code package.
 
-using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-#if XNA
-namespace MonoGame.Framework.Audio
-#else
 namespace Microsoft.Xna.Framework.Audio
-#endif
 {
     /// <summary>
     /// Represents a 3D audio listener. Used when simulating 3D Audio.
     /// </summary>
 	public class AudioListener
 	{
+	    /// <summary>
+	    /// Create an <see cref="AudioListener"/> instance.
+	    /// </summary>
 		public AudioListener ()
 		{
 			Forward = Vector3.Forward;

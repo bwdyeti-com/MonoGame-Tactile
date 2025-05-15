@@ -44,7 +44,11 @@ namespace Microsoft.Xna.Framework.Input.Touch
         /// <summary>
         /// The current timestamp that we use for setting the timestamp of new TouchLocations
         /// </summary>
+#if DESKTOPGL
         public static TimeSpan CurrentTimestamp { get; set; }
+#else
+        internal static TimeSpan CurrentTimestamp { get; set; }
+#endif
 
         /// <summary>
         /// The mapping between platform specific touch ids
@@ -56,24 +60,12 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
         private TouchPanelCapabilities Capabilities = new TouchPanelCapabilities();
 
-#if !XNA
         internal readonly GameWindow Window;
 
         internal TouchPanelState(GameWindow window)
         {
             Window = window;
         }
-#else
-        /// <summary>
-        /// The current size of the display.
-        /// </summary>
-        private Point _windowSize = Point.Zero;
-
-        internal TouchPanelState(Point windowSize)
-        {
-            _windowSize = windowSize;
-        }
-#endif
 
         /// <summary>
         /// The window handle of the touch panel. Purely for Xna compatibility.
@@ -98,33 +90,35 @@ namespace Microsoft.Xna.Framework.Input.Touch
             for (var i = state.Count - 1; i >= 0; i--)
             {
                 var touch = state[i];
-                if (touch.State == TouchLocationState.Released)
+                switch (touch.State)
                 {
-                    // Remove Moved state touches that are older than this one
-                    for (int j = i + 1; j < state.Count; j++)
-                    {
-                        var olderTouch = state[j];
-                        if (olderTouch.Id == touch.Id &&
-                                olderTouch.State == TouchLocationState.Moved &&
-                                olderTouch.Timestamp <= touch.Timestamp)
-                            state.RemoveAt(j);
+                    case TouchLocationState.Released:
+                        // Remove Moved state touches that are older than this one
+                        for (int j = i + 1; j < state.Count; j++)
+                        {
+                            var olderTouch = state[j];
+                            if (olderTouch.Id == touch.Id &&
+                                    olderTouch.State == TouchLocationState.Moved &&
+                                    olderTouch.Timestamp <= touch.Timestamp)
+                                state.RemoveAt(j);
+#if TOUCH_DISPOSE_LOGGING
+                            Console.WriteLine(string.Format(
+                                "Moved ({0} left): removed in AgeTouches()", state.Count));
+#endif
+                        }
+
+                        state.RemoveAt(i);
 #if TOUCH_DISPOSE_LOGGING
                         Console.WriteLine(string.Format(
-                            "Moved ({0} left): removed in AgeTouches()", state.Count));
+                            "Released ({0} left): removed in AgeTouches()", state.Count));
 #endif
-                    }
-
-                    state.RemoveAt(i);
-#if TOUCH_DISPOSE_LOGGING
-                    Console.WriteLine(string.Format(
-                        "Released ({0} left): removed in AgeTouches()", state.Count));
-#endif
-                }
-                // Ages a press state into moved or released
-                else if (touch.State == TouchLocationState.Pressed)
-                {
-                    touch.AgeState();
-                    state[i] = touch;
+                        break;
+                    // Ages a press state into moved or released
+                    case TouchLocationState.Pressed:
+                    case TouchLocationState.Moved:
+                        touch.AgeState();
+                        state[i] = touch;
+                        break;
                 }
             }
         }
@@ -279,12 +273,16 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
         private void UpdateTouchScale()
         {
+#if DESKTOPGL
+            _touchScale = Vector2.One;
+#else
             // Get the window size.
-            var windowSize = this.WindowSize;
+            var windowSize = new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height);
 
             // Recalculate the touch scale.
             _touchScale = new Vector2(  _displaySize.X / windowSize.X,
                                         _displaySize.Y / windowSize.Y);
+#endif
         }
 
         /// <summary>
@@ -354,29 +352,6 @@ namespace Microsoft.Xna.Framework.Input.Touch
                 _displaySize.X = value;
                 UpdateTouchScale();
             }
-        }
-
-        /// <summary>
-        /// Gets or sets the display height of the touch panel.
-        /// </summary>
-        public Vector2 WindowSize
-        {
-            get
-            {
-#if !XNA
-                return new Vector2(Window.ClientBounds.Width, Window.ClientBounds.Height);
-#else
-                return new Vector2(_windowSize.X, _windowSize.Y);
-#endif
-            }
-#if !XNA
-#else
-            set
-            {
-                _windowSize = new Point((int)value.X, (int)value.Y);
-                UpdateTouchScale();
-            }
-#endif
         }
 
         /// <summary>

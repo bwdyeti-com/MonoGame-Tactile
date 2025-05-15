@@ -6,18 +6,14 @@ using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-#if XNA
-namespace MonoGame.Framework.Audio
-#else
 namespace Microsoft.Xna.Framework.Audio
-#endif
 {
 
     /// <summary>
     /// The exception thrown when no audio hardware is present, or driver issues are detected.
     /// </summary>
     [DataContract]
-#if WINRT
+#if WINDOWS_UAP
     public sealed class NoAudioHardwareException : Exception
 #else
     public sealed class NoAudioHardwareException : ExternalException

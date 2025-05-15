@@ -4,11 +4,7 @@
 
 using System;
 
-#if XNA
-namespace MonoGame.Framework.Audio
-#else
 namespace Microsoft.Xna.Framework.Audio
-#endif
 {
     /// <summary>Controls how Cue objects should cease playback when told to stop.</summary>
 	public enum AudioStopOptions

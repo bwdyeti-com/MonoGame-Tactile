@@ -5,13 +5,9 @@
 using System;
 using System.IO;
 
-#if XNA
-namespace MonoGame.Framework.Audio
-#else
 namespace Microsoft.Xna.Framework.Audio
-#endif
 {
-    abstract class ClipEvent
+	abstract class ClipEvent
     {
         protected XactClip _clip;
 
@@ -32,9 +28,9 @@ namespace Microsoft.Xna.Framework.Audio
         public abstract void Resume();
         public abstract void SetFade(float fadeInDuration, float fadeOutDuration);
         public abstract void SetTrackVolume(float volume);
+        public abstract void SetTrackPan(float pan);
+        public abstract void SetState(float volume, float pitch, float reverbMix, float? filterFrequency, float? filterQFactor);
 	    public abstract bool Update(float dt);
-
-        public abstract void Apply3D(AudioListener listener, AudioEmitter emitter);
     }
 }
 

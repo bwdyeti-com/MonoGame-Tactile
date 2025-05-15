@@ -47,6 +47,12 @@ namespace Microsoft.Xna.Framework
         public const float TwoPi = (float)(Math.PI * 2.0);
         
         /// <summary>
+        /// Represents the value of pi times two(6.28318548).
+        /// This is an alias of TwoPi.
+        /// </summary>
+        public const float Tau = TwoPi;
+        
+        /// <summary>
         /// Returns the Cartesian coordinate for one axis of a point that is defined by a given triangle and two normalized barycentric (areal) coordinates.
         /// </summary>
         /// <param name="value1">The coordinate on one axis of vertex 1 of the defining triangle.</param>
@@ -295,22 +301,17 @@ namespace Microsoft.Xna.Framework
         /// </summary>
         /// <param name="angle">The angle to reduce, in radians.</param>
         /// <returns>The new angle, in radians.</returns>
-	public static float WrapAngle(float angle)
-	{
-            angle = (float)Math.IEEERemainder((double)angle, 6.2831854820251465);
-	    if (angle <= -3.14159274f)
-	    {
-		angle += 6.28318548f;
-	    }
-	    else
-	    {
-		if (angle > 3.14159274f)
-		{
-		   angle -= 6.28318548f;
-		}
-	    }
-	    return angle;
-	}
+        public static float WrapAngle(float angle)
+        {
+            if ((angle > -Pi) && (angle <= Pi))
+                return angle;
+            angle %= TwoPi;
+            if (angle <= -Pi)
+                return angle + TwoPi;
+            if (angle > Pi)
+                return angle - TwoPi;
+            return angle;
+        }
 
  	/// <summary>
         /// Determines if value is powered by two.

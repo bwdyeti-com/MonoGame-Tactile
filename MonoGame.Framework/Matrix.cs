@@ -188,6 +188,13 @@ namespace Microsoft.Xna.Framework
 
         #region Indexers
 
+        /// <summary>
+        /// Get or set the matrix element at the given index, indexed in row major order.
+        /// </summary>
+        /// <param name="index">The linearized, zero-based index of the matrix element.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// If the index is less than <code>0</code> or larger than <code>15</code>.
+        /// </exception>
         public float this[int index]
         {
             get
@@ -239,6 +246,14 @@ namespace Microsoft.Xna.Framework
             }
         }
 
+        /// <summary>
+        /// Get or set the value at the specified row and column (indices are zero-based).
+        /// </summary>
+        /// <param name="row">The row of the element.</param>
+        /// <param name="column">The column of the element.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// If the row or column is less than <code>0</code> or larger than <code>3</code>.
+        /// </exception>
         public float this[int row, int column]
         {
             get
@@ -357,17 +372,6 @@ namespace Microsoft.Xna.Framework
         }
 
         /// <summary>
-        /// Rotation stored in this matrix.
-        /// </summary>
-        public Quaternion Rotation
-        {
-            get
-            {
-                return Quaternion.CreateFromRotationMatrix(this);
-            }
-        }
-
-        /// <summary>
         /// Position stored in this matrix.
         /// </summary>
         public Vector3 Translation
@@ -381,23 +385,6 @@ namespace Microsoft.Xna.Framework
                 this.M41 = value.X;
                 this.M42 = value.Y;
                 this.M43 = value.Z;
-            }
-        }
-
-        /// <summary>
-        /// Scale stored in this matrix.
-        /// </summary>
-        public Vector3 Scale
-        {
-            get
-            {
-                return new Vector3(this.M11, this.M22, this.M33);
-            }
-            set
-            {
-                this.M11 = value.X;
-                this.M22 = value.Y;
-                this.M33 = value.Z;
             }
         }
 
@@ -1024,6 +1011,7 @@ namespace Microsoft.Xna.Framework
             CreatePerspectiveOffCenter(left, right, bottom, top, nearPlaneDistance, farPlaneDistance, out result);
             return result;
         }
+
         /// <summary>
         /// Creates a new projection <see cref="Matrix"/> for customized perspective view.
         /// </summary>
@@ -1410,7 +1398,6 @@ namespace Microsoft.Xna.Framework
         {
             Plane plane;
             Plane.Normalize(ref value, out plane);
-            value.Normalize();
             float x = plane.Normal.X;
             float y = plane.Normal.Y;
             float z = plane.Normal.Z;
@@ -1691,8 +1678,9 @@ namespace Microsoft.Xna.Framework
         /// <returns>The inverted matrix.</returns>
         public static Matrix Invert(Matrix matrix)
         {
-            Invert(ref matrix, out matrix);
-            return matrix;
+            Matrix result;
+            Invert(ref matrix, out result);
+            return result;
         }
 
         /// <summary>
