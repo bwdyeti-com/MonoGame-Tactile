@@ -73,17 +73,22 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(SolutionName)' != 'MonoGame.Framework.WindowsDX'">
-    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj">
-      <PrivateAssets>All</PrivateAssets>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(SolutionName)' == 'MonoGame.Framework.WindowsDX'">
-    <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.WindowsDX.csproj">
-      <PrivateAssets>All</PrivateAssets>
-    </ProjectReference>
-  </ItemGroup>
+  <Choose>
+    <When Condition="$([System.Text.RegularExpressions.Regex]::IsMatch($(SolutionName), '^(.*)\.DesktopGL(.*)$'))">
+      <ItemGroup>
+        <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.DesktopGL.csproj">
+          <PrivateAssets>All</PrivateAssets>
+        </ProjectReference>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <ProjectReference Include="..\MonoGame.Framework\MonoGame.Framework.WindowsDX.csproj">
+          <PrivateAssets>All</PrivateAssets>
+        </ProjectReference>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
 
 
   <ItemGroup>
