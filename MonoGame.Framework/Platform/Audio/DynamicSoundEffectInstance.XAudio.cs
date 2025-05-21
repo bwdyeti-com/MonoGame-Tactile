@@ -80,6 +80,10 @@ namespace Microsoft.Xna.Framework.Audio
         private void PlatformUpdateQueue()
         {
             // The XAudio implementation utilizes callbacks, so no work here.
+
+            // Other than checking if more buffers need to be added, since
+            // otherwise there is never more than one buffer ready
+            CheckBufferCount();
         }
 
         private void PlatformDispose(bool disposing)
