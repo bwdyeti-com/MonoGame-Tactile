@@ -35,6 +35,7 @@ namespace MonoGame.Framework
         private bool _isBorderless;
         private bool _isMouseHidden;
         private bool _isMouseInBounds;
+        private bool _minimizeWithoutFocus;
 
         private Point _locationBeforeFullScreen;
         // flag to indicate that we're switching to/from full screen and should ignore resize events
@@ -109,6 +110,18 @@ namespace MonoGame.Framework
                 _wasMoved = true;
                 Form.Location = new Point(value.X, value.Y);
                 RefreshAdapter();
+            }
+        }
+
+        public override bool MinimizeFullscreenOnFocusLost
+        {
+            get
+            {
+                return _minimizeWithoutFocus;
+            }
+            set
+            {
+                _minimizeWithoutFocus = value;
             }
         }
 
@@ -242,12 +255,21 @@ namespace MonoGame.Framework
 
         private void OnDeactivate(object sender, EventArgs eventArgs)
         {
-            // If in exclusive mode full-screen, force it out of exclusive mode and minimize the window
-			if( IsFullScreen && _platform.Game.GraphicsDevice.PresentationParameters.HardwareModeSwitch ) {			
-				// This is true when the user presses the Windows key while game window has focus
-				if( Form.WindowState == FormWindowState.Minimized )
-					MinimizeFullScreen();				
-			}
+            if (IsFullScreen)
+            {
+                // If in exclusive mode full-screen, force it out of exclusive mode and minimize the window
+                if (_platform.Game.GraphicsDevice.PresentationParameters.HardwareModeSwitch)
+                {
+                    // This is true when the user presses the Windows key while game window has focus
+                    if (Form.WindowState == FormWindowState.Minimized)
+                        MinimizeFullScreen();
+                }
+                // Else if borderless and should minimize when focus is lost
+                else if (_minimizeWithoutFocus)
+                {
+                    MinimizeFullScreen();
+                }
+            }
             _platform.IsActive = false;
             Keyboard.SetActive(false);
         }
@@ -616,7 +638,7 @@ namespace MonoGame.Framework
             _switchingFullScreen = true;
 
             // store the location of the window so we can restore it later
-            if (!IsFullScreen)
+            if (!IsFullScreen && _lastFormState != FormWindowState.Minimized)
                 _locationBeforeFullScreen = Form.Location;
 
             _platform.Game.GraphicsDevice.SetHardwareFullscreen();

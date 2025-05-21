@@ -42,7 +42,7 @@ namespace Microsoft.Xna.Framework
         public abstract Point Position { get; set; }
 #endif
 
-#if DESKTOPGL
+#if (WINDOWS && !WINDOWS_UAP) || DESKTOPGL
         /// <summary>
         /// If true, the game window should minimize on losing focus.
         /// </summary>
