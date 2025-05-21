@@ -78,7 +78,7 @@ namespace Microsoft.Xna.Framework.Input.Touch
             PrimaryWindow.TouchPanelState.AddEvent(id, state, position, isMouse);
         }
 
-#if DESKTOPGL
+#if WINDOWS || DESKTOPGL
         public static void AddEmulatedEvent(int id, TouchLocationState state, Vector2 position)
         {
             AddEvent(id, state, position, true);
