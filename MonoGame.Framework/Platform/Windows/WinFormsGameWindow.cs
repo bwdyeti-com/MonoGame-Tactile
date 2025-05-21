@@ -36,6 +36,7 @@ namespace MonoGame.Framework
         private bool _isMouseHidden;
         private bool _isMouseInBounds;
         private bool _minimizeWithoutFocus;
+        private bool _firstActivation = true;
 
         private Point _locationBeforeFullScreen;
         // flag to indicate that we're switching to/from full screen and should ignore resize events
@@ -251,6 +252,12 @@ namespace MonoGame.Framework
         {
             _platform.IsActive = true;
             Keyboard.SetActive(true);
+
+            if (_firstActivation)
+            {
+                _firstActivation = false;
+                OnShown(new EventArgs());
+            }
         }
 
         private void OnDeactivate(object sender, EventArgs eventArgs)
