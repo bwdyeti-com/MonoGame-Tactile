@@ -129,8 +129,8 @@ namespace Microsoft.Xna.Framework
                         {
                             try
                             {
-                                var loader = new StbImageSharp.ImageStreamLoader();
-                                var imageResult = loader.Load(stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
+                                var imageResult = StbImageSharp.ImageResult.FromStream(
+                                    stream, StbImageSharp.ColorComponents.RedGreenBlueAlpha);
 
                                 _icon = Sdl.CreateRGBSurfaceFrom(
                                     imageResult.Data, imageResult.Width, imageResult.Height,
@@ -187,8 +187,13 @@ namespace Microsoft.Xna.Framework
                 winy |= GetMouseDisplay();
             }
 
-            _handle = Sdl.Window.Create(AssemblyHelper.GetDefaultWindowTitle(),
-                winx, winy, _width, _height, initflags);
+            _width = GraphicsDeviceManager.DefaultBackBufferWidth;
+            _height = GraphicsDeviceManager.DefaultBackBufferHeight;
+
+            _handle = Sdl.Window.Create(
+                AssemblyHelper.GetDefaultWindowTitle(),
+                winx, winy, _width, _height, initflags
+            );
 
             Id = Sdl.Window.GetWindowId(_handle);
 
