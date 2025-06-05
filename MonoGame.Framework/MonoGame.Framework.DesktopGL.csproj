@@ -78,6 +78,7 @@
 
     <Compile Include="..\ThirdParty\NVorbis\NVorbis\**\*.cs" LinkBase="ThirdParty\NVorbis" />
     <Compile Remove="..\ThirdParty\NVorbis\NVorbis\Properties\AssemblyInfo.cs" />
+    <Compile Remove="..\ThirdParty\NVorbis\NVorbis\obj\**\*" />
   </ItemGroup>
 
   <ItemGroup>
