@@ -213,7 +213,16 @@ namespace MonoGame.Framework
             var assembly = Assembly.GetEntryAssembly();
             if (assembly == null)
                 return;
-            var handle = ExtractIcon(IntPtr.Zero, assembly.Location, 0);
+            string assemblyPath = assembly.Location;
+            // If there is no location for the assembly,
+            // try the current process filename
+            if (string.IsNullOrEmpty(assemblyPath))
+            {
+                assemblyPath = System.Diagnostics
+                    .Process.GetCurrentProcess().MainModule.FileName;
+            }
+
+            var handle = ExtractIcon(IntPtr.Zero, assemblyPath, 0);
             if (handle != IntPtr.Zero)
                 Form.Icon = Icon.FromHandle(handle);
         }
